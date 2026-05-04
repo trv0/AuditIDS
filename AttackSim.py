@@ -91,21 +91,39 @@ def reveal_compromised():
 
 # GUI setup
 root = tk.Tk()
-root.title("Intrusion Simulator")
+root.title("AttackSim - Login")
+root.geometry("400x250")
 
-tk.Label(root, text="Username:").pack()
+# Center the grid
+root.columnconfigure(0, weight=1)
+root.columnconfigure(1, weight=2)
+
+# --- Title ---
+title_label = tk.Label(root, text="TotallyRealWebsite.com", font=("Arial", 16, "bold"))
+title_label.grid(row=0, column=0, columnspan=2, pady=(15, 10))
+
+# --- Username ---
+tk.Label(root, text="Username:").grid(row=1, column=0, padx=10, pady=10, sticky="e")
 username_entry = tk.Entry(root)
-username_entry.pack()
+username_entry.grid(row=1, column=1, padx=10, pady=10, sticky="we")
 
-tk.Label(root, text="Password:").pack()
+# --- Password ---
+tk.Label(root, text="Password:").grid(row=2, column=0, padx=10, pady=10, sticky="e")
 password_entry = tk.Entry(root, show="*")
-password_entry.pack()
+password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="we")
 
-tk.Button(root, text="Login", command=login).pack()
-tk.Button(root, text="Brute Force", command=brute_force).pack()
-tk.Button(root, text="Reveal Compromised User", command=reveal_compromised).pack()
+# --- Buttons ---
+login_btn = tk.Button(root, text="Login", command=login)
+login_btn.grid(row=3, column=0, padx=10, columnspan=2,pady=10, sticky="we")
 
-status_label = tk.Label(root, text="")
-status_label.pack()
+brute_btn = tk.Button(root, text="Brute Force", command=brute_force)
+brute_btn.grid(row=4, column=1, padx=10, pady=10, sticky="we")
+
+reveal_btn = tk.Button(root, text="Reveal Compromised User", command=reveal_compromised)
+reveal_btn.grid(row=4, column=0, padx=10, pady=10, sticky="we")
+
+# --- Status label ---
+status_label = tk.Label(root, text="", fg="blue")
+status_label.grid(row=5, column=0, columnspan=2, pady=10)
 
 root.mainloop()

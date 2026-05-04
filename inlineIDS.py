@@ -1,3 +1,6 @@
+"""
+MITRE-Attack Data courtesy of : https://github.com/mitre/cti/blob/master/enterprise-attack/enterprise-attack.json
+"""
 import time
 import os
 import re
@@ -78,13 +81,14 @@ def get_technique(tech_id):
 # --- Alerting ---
 def alert(timestamp, ip, tech_id):
     name, desc = get_technique(tech_id)
-
+    
     print(f"\nALERT [{tech_id}] {name}")
     print(f"Time: {timestamp} | IP: {ip}")
     print(f"Description: {desc[:120]}...\n")
 
-    with open("IDS_Report.txt", "a") as f:
+    with open("IDS_report.txt", "a") as f:
         f.write(f"{timestamp},{ip},{tech_id},{name},{desc}\n")
+        f.write("-" * 80 + "\n")
 
 # --- Detection Logic ---
 def detect_failed_login(ip, timestamp):
@@ -123,7 +127,7 @@ def IDS(line):
 
     timestamp, content, ip, username = parsed
 
-    print(f"[LOG] {line}")
+    # print(f"[LOG] {line}")
 
     # SQL Injection (check first)
     detect_sql_injection(content, ip, timestamp)
