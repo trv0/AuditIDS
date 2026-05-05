@@ -1,3 +1,12 @@
+"""
+AttackSim.py simulates a login screen while also allowing user to perform several types of attacks. Logs “network” activity to a file (network_log.txt) in real time
+
+The purpose of this project is to demonstrate knowledge of both common attack techniques as well as intrusion detection systems (IDS) via simulated network activity with a malicious actor. 
+Attack techniques that are simulated will be detected and mapped based on the MITRE ATT&CK framework and delivered to the user for review. 
+
+Authors: Troy Ventura and Yousef Ahmed
+"""
+
 import tkinter as tk
 from datetime import datetime
 import random
@@ -14,10 +23,10 @@ CREATE TABLE IF NOT EXISTS users (
 )
 """)
 
-# Clear existing data (optional for repeat runs)
+# Clear existing data 
 cursor.execute("DELETE FROM users")
 
-# Insert 4 sample users
+# Sample users
 users = [
     ("admin", "4321"),
     ("troy", "1234"),
@@ -30,8 +39,8 @@ cursor.executemany("INSERT INTO users VALUES (?, ?)", users)
 conn.commit()
 conn.close()
 
+# Log the login attempt to network_log.txt 
 def log_attempt(username, password, success):
-    """Log the login attempt to network_log.txt in a format similar to OpenSSH logs."""
     timestamp = datetime.now().strftime("%b %d %H:%M:%S")
     ip = "192.0.2.0"
     pid = random.randint(10000, 99999)  # Fake PID
@@ -49,7 +58,6 @@ def login():
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
-    # Vulnerable query (DO NOT USE IN REAL SYSTEMS)
     query = f"SELECT * FROM users WHERE username = '{user}' AND password = '{pwd}'"
     cursor.execute(query)
 
@@ -67,9 +75,8 @@ def login():
     username_entry.delete(0, tk.END)
     password_entry.delete(0, tk.END)
 
-
+# Simulates brute force attempt by guessing every 4-digit PIN for a target username
 def brute_force():
-    """Try every 4-digit PIN for the entered username."""
     target_username = username_entry.get().strip() or "admin"
 
     for pin in range(10000):
@@ -98,21 +105,21 @@ root.geometry("400x250")
 root.columnconfigure(0, weight=1)
 root.columnconfigure(1, weight=2)
 
-# --- Title ---
+# Title 
 title_label = tk.Label(root, text="TotallyRealWebsite.com", font=("Arial", 16, "bold"))
 title_label.grid(row=0, column=0, columnspan=2, pady=(15, 10))
 
-# --- Username ---
+# Username 
 tk.Label(root, text="Username:").grid(row=1, column=0, padx=10, pady=10, sticky="e")
 username_entry = tk.Entry(root)
 username_entry.grid(row=1, column=1, padx=10, pady=10, sticky="we")
 
-# --- Password ---
+# Password
 tk.Label(root, text="Password:").grid(row=2, column=0, padx=10, pady=10, sticky="e")
 password_entry = tk.Entry(root, show="*")
 password_entry.grid(row=2, column=1, padx=10, pady=10, sticky="we")
 
-# --- Buttons ---
+# Login and Attack Buttons
 login_btn = tk.Button(root, text="Login", command=login)
 login_btn.grid(row=3, column=0, padx=10, columnspan=2,pady=10, sticky="we")
 
@@ -122,7 +129,7 @@ brute_btn.grid(row=4, column=1, padx=10, pady=10, sticky="we")
 reveal_btn = tk.Button(root, text="Reveal Compromised User", command=reveal_compromised)
 reveal_btn.grid(row=4, column=0, padx=10, pady=10, sticky="we")
 
-# --- Status label ---
+# Status label
 status_label = tk.Label(root, text="", fg="blue")
 status_label.grid(row=5, column=0, columnspan=2, pady=10)
 

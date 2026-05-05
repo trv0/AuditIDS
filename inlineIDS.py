@@ -1,6 +1,13 @@
 """
+inlineIDS.py: reads from network_log.txt, examines each line as they appear to detect intrusion techniques and warn the user. Logs each alert into both terminal and new file (IDS_report.txt)
+
+The purpose of this project is to demonstrate knowledge of both common attack techniques as well as intrusion detection systems (IDS) via simulated network activity with a malicious actor. 
+Attack techniques that are simulated will be detected and mapped based on the MITRE ATT&CK framework and delivered to the user for review. 
+
+Authors: Troy Ventura and Yousef Ahmed 
 MITRE-Attack Data courtesy of : https://github.com/mitre/cti/blob/master/enterprise-attack/enterprise-attack.json
 """
+
 import time
 import os
 import re
@@ -10,7 +17,7 @@ from mitreattack.stix20 import MitreAttackData
 FILE_PATH = "network_log.txt"
 POLL_INTERVAL = 0.5
 
-# --- Detection Config ---
+# Detection Config 
 BRUTE_FORCE_THRESHOLD = 5
 TIME_WINDOW = 60  # seconds
 
@@ -23,18 +30,18 @@ SQL_PATTERNS = [
     r"\" OR"
 ]
 
-# --- State Tracking ---
+# State Tracking 
 failed_attempts = defaultdict(list)
 techniques = {}
 
-# --- MITRE fallback ---
+# MITRE fallback if JSON fails to load
 FALLBACK = {
     "T1110": ("Brute Force", "Repeated login attempts to guess credentials."),
     "T1078": ("Valid Accounts", "Use of legitimate credentials."),
     "T1190": ("Exploit Public-Facing Application", "Injection attacks like SQLi.")
 }
 
-# --- File Monitoring ---
+# File Monitoring
 def wait_for_file(path):
     if not os.path.exists(path):
         print(f"Waiting for {path}...")
@@ -51,7 +58,7 @@ def follow(path):
             else:
                 time.sleep(POLL_INTERVAL)
 
-# --- Parsing ---
+# Parsing each line of the log to extract timestamp, content, source IP, and username 
 def parse_log(line):
     pattern = r'(\w+ \d+ \d+:\d+:\d+) sshd\[\d+\]: (.+)'
     match = re.match(pattern, line)
@@ -69,7 +76,7 @@ def parse_log(line):
 
     return timestamp, content, source_ip, username
 
-# --- MITRE Lookup ---
+# MITRE mapping
 def get_technique(tech_id):
     if techniques:
         for tech in techniques:
@@ -78,7 +85,7 @@ def get_technique(tech_id):
                 return tech.get("name"), tech.get("description")
     return FALLBACK.get(tech_id, ("Unknown", "No description"))
 
-# --- Alerting ---
+# Alert for attacks
 def alert(timestamp, ip, tech_id):
     name, desc = get_technique(tech_id)
     
@@ -90,7 +97,7 @@ def alert(timestamp, ip, tech_id):
         f.write(f"{timestamp},{ip},{tech_id},{name},{desc}\n")
         f.write("-" * 80 + "\n")
 
-# --- Detection Logic ---
+# Detection logic
 def detect_failed_login(ip, timestamp):
     now = time.time()
     failed_attempts[ip].append(now)
@@ -119,7 +126,7 @@ def detect_sql_injection(content, ip, timestamp):
             alert(timestamp, ip, "T1190")
             break
 
-# --- Main IDS ---
+# Main IDS
 def IDS(line):
     parsed = parse_log(line)
     if not parsed:
@@ -127,9 +134,10 @@ def IDS(line):
 
     timestamp, content, ip, username = parsed
 
+    # Print all attempts (Debugging Purposes) 
     # print(f"[LOG] {line}")
 
-    # SQL Injection (check first)
+    # SQL Injection 
     detect_sql_injection(content, ip, timestamp)
 
     # Failed login
@@ -140,7 +148,6 @@ def IDS(line):
     elif "Accepted password" in content:
         detect_success(content, username, ip, timestamp)
 
-# --- Main ---
 def main():
     global techniques
 
